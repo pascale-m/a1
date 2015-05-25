@@ -73,7 +73,7 @@ void change_directory(char *cwd, char *directory) {
 	bzero(cwd, strlen(cwd));
 
 	if(strncmp(directory, "~", 1)==0) {
-		//change directory to the home directory
+		//change to the home directory
 		strncpy(cwd, homedirectory, strlen(homedirectory));
 
 		//add path to directory
@@ -86,24 +86,19 @@ void change_directory(char *cwd, char *directory) {
 			strncat(cwd, path, strlen(path));
 		}	
 	} else if(strncmp(directory, "..", 2)==0) {
+	  
+	        getdirectory(cwd, 1024);
 		char *path = (char*)malloc(strlen(cwd) + 1);
-		int i = strlen(cwd-1);
+		int i = strlen(cwd)-1;
 
-		do {
+		while(cwd[i]!= '/') {
 			--i;
-		} while(cwd[i] != '/');
+		}
 		strncpy(path, cwd, i);
 
-		//add path to directory
-		if(strcmp(directory, "../") > 0) {
-			char path[strlen(directory) - 1];
-			int i;
-			for(i=0; i<strlen(directory)-1; i++) {
-				path[i] = directory[i+1];
-			}
-			strncat(cwd, path, strlen(path));
-		}	
-	} else {
+		bzero(cwd, strlen(cwd));
+		strncpy(cwd, path, strlen(path));
+	        } else {
 		strcpy(cwd, directory);
 	}
 
@@ -119,6 +114,7 @@ int main(void) {
 	size_t size = 1024;
 	char cwd[size];
 	char *argv[100];
+	argv[0] = NULL;
 	char *word = (char *)malloc(sizeof(char) * 100);
 	word[0] = '\0';
 	char *cmd = (char *)malloc(sizeof(char) *100);
@@ -131,13 +127,16 @@ int main(void) {
 	} while(error);
 
 	if(fork() == 0) {
-		execvp("clear", argv);
+	  if(execvp("clear", argv) == -1) {
+	    printf("clearing screen did not work. errno: %d\n", errno);
+	  }
 		exit(1);
 	} else {
 		wait(NULL);
 	}
 
 	printf("RSI: %s > ", cwd);
+	fflush(stdout);
 
     int argc = 0;
 	while(c != EOF) {
@@ -169,7 +168,7 @@ int main(void) {
 						wait(NULL);
 					} 
 				}
-				printf("Your command is %s \n", *argv);
+				getdirectory(cwd, size);
 				printf("RSI: %s > ", cwd);
 				free_argv(argv);
 
