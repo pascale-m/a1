@@ -1,3 +1,11 @@
+/* Simple Command Line Application
+
+Functionality:
+
+Change Directory
+Get Name of Current Directory
+
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
